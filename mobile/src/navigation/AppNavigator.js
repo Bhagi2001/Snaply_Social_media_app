@@ -17,6 +17,7 @@ import SplashScreen from '../screens/SplashScreen';
 import HomeFeedScreen from '../screens/home/HomeFeedScreen';
 import CreatePostScreen from '../screens/home/CreatePostScreen';
 import PostDetailScreen from '../screens/home/PostDetailScreen';
+import EditPostScreen from '../screens/home/EditPostScreen';
 import ExploreScreen from '../screens/explore/ExploreScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
@@ -64,6 +65,7 @@ const HomeStack = () => (
     <Stack.Screen name="Notifications" component={NotificationScreen} />
     <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ animation: 'fade' }} />
     <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
+    <Stack.Screen name="EditPost" component={EditPostScreen} />
   </Stack.Navigator>
 );
 
@@ -75,6 +77,7 @@ const ExploreStack = () => (
     <Stack.Screen name="UserProfile" component={ProfileScreen} />
     <Stack.Screen name="Followers" component={FollowersScreen} />
     <Stack.Screen name="Following" component={FollowingScreen} />
+    <Stack.Screen name="EditPost" component={EditPostScreen} />
   </Stack.Navigator>
 );
 
@@ -98,6 +101,7 @@ const ProfileStack = () => (
     <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
     <Stack.Screen name="InteractionList" component={InteractionListScreen} />
     <Stack.Screen name="UserProfile" component={ProfileScreen} />
+    <Stack.Screen name="EditPost" component={EditPostScreen} />
   </Stack.Navigator>
 );
 

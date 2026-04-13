@@ -16,19 +16,19 @@ const getBaseUrl = () => {
 
     // Web browser
     if (Platform.OS === 'web') {
-      return 'http://localhost:5000/api';
+      return 'http://localhost:5001/api';
     }
 
     // Expo Go on physical device should call the host machine over LAN.
     if (expoHost) {
-      return `http://${expoHost}:5000/api`;
+      return `http://${expoHost}:5001/api`;
     }
 
     // Android emulator uses 10.0.2.2, iOS simulator uses localhost
     if (Platform.OS === 'android') {
-      return 'http://10.0.2.2:5000/api';
+      return 'http://10.0.2.2:5001/api';
     }
-    return 'http://localhost:5000/api';
+    return 'http://localhost:5001/api';
   }
   return 'https://your-production-api.com/api';
 };
