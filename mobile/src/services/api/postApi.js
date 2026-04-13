@@ -6,7 +6,9 @@ export const postApi = {
   }),
   getFeed: (page = 1) => api.get(`/posts/feed?page=${page}`),
   getPost: (postId) => api.get(`/posts/${postId}`),
-  updatePost: (postId, data) => api.put(`/posts/${postId}`, data),
+  updatePost: (postId, formData) => api.put(`/posts/${postId}`, formData, {
+    timeout: 120000, // 2 min for large uploads
+  }),
   deletePost: (postId) => api.delete(`/posts/${postId}`),
   likePost: (postId) => api.post(`/posts/${postId}/like`),
   unlikePost: (postId) => api.delete(`/posts/${postId}/like`),
