@@ -160,6 +160,32 @@ const HomeFeedScreen = ({ navigation }) => {
     }
   }, []);
 
+  const handleDeletePost = useCallback((postId) => {
+    setPosts(prev => prev.filter(p => p._id !== postId));
+  }, []);
+
+  const handleEditPost = useCallback((postToEdit) => {
+    navigation.navigate('EditPost', {
+      postId: postToEdit._id,
+      initialCaption: postToEdit.caption,
+      initialLocation: postToEdit.location,
+      media: postToEdit.media,
+      onUpdate: (updatedPost) => {
+        setPosts(prev =>
+          prev.map(p =>
+            p._id === updatedPost._id
+              ? {
+                ...p,
+                caption: updatedPost.caption,
+                location: updatedPost.location,
+              }
+              : p
+          )
+        );
+      }
+    });
+  }, [navigation]);
+
   const renderHeader = () => (
     <View>
       <StoryBar navigation={navigation} />
@@ -221,7 +247,7 @@ const HomeFeedScreen = ({ navigation }) => {
             style={styles.headerIcon}
             onPress={() => navigation.navigate('ChatList')}
           >
-            <Ionicons name="paper-plane-outline" size={24} color="#FFFFFF" />
+            <Ionicons name="chatbox-outline" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -240,6 +266,8 @@ const HomeFeedScreen = ({ navigation }) => {
               onLike={handleLike}
               onSave={handleSave}
               currentUserId={user?._id}
+              onDeletePost={handleDeletePost}
+              onEditPost={handleEditPost}
             />
           )}
           keyExtractor={(item) => item._id}
