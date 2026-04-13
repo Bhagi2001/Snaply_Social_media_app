@@ -45,7 +45,7 @@ router.get('/hashtag/:tag', optionalAuth, getPostsByHashtag);
 // Posts CRUD
 router.post('/', auth, upload.array('media', 10), createPost);
 router.get('/:id', optionalAuth, getPost);
-router.put('/:id', auth, updatePost);
+router.put('/:id', auth, upload.array('media', 10), updatePost);
 router.delete('/:id', auth, deletePost);
 
 // Likes
