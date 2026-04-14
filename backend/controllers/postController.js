@@ -155,6 +155,48 @@ const updatePost = async (req, res, next) => {
     if (caption !== undefined) post.caption = caption;
     if (location !== undefined) post.location = location;
 
+    // Parse kept existing media
+    let keptMedia = [];
+    if (req.body.existingMedia) {
+      try {
+        keptMedia = JSON.parse(req.body.existingMedia);
+      } catch (err) {
+        return res.status(400).json({ success: false, message: 'Invalid existingMedia format' });
+      }
+    } else {
+      // If existingMedia is not provided, it means they might be using a client 
+      // that doesn't support editing media yet, so we fall back to keeping all current media.
+      keptMedia = post.media;
+    }
+
+    const newFilesCount = req.files ? req.files.length : 0;
+    if (keptMedia.length + newFilesCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one image or video is required'
+      });
+    }
+
+    // Identify which media items were deleted
+    const deletedMedia = post.media.filter(originalItem => 
+      !keptMedia.some(keptItem => keptItem.publicId === originalItem.publicId)
+    );
+
+    // Delete deleted items from Cloudinary
+    for (const media of deletedMedia) {
+      const resourceType = media.type === 'video' ? 'video' : 'image';
+      await deleteFromCloudinary(media.publicId, resourceType);
+    }
+
+    // Upload new media if any
+    let newMedia = [];
+    if (req.files && req.files.length > 0) {
+      newMedia = await uploadMultiple(req.files, 'social-media/posts');
+    }
+
+    // Save combined media
+    post.media = [...keptMedia, ...newMedia];
+
     await post.save();
     await post.populate('user', 'username fullName avatar isVerified');
 
