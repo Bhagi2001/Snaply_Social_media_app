@@ -90,6 +90,26 @@ const PostDetailScreen = ({ route, navigation }) => {
       console.error('Error toggling save:', error);
     }
   }, []);
+  const handleDeletePost = useCallback((deletedPostId) => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleEditPost = useCallback((postToEdit) => {
+    navigation.navigate('EditPost', {
+      postId: postToEdit._id,
+      initialCaption: postToEdit.caption,
+      initialLocation: postToEdit.location,
+      media: postToEdit.media,
+      onUpdate: (updatedPost) => {
+        setPost(prev => prev ? {
+          ...prev,
+          caption: updatedPost.caption,
+          location: updatedPost.location,
+        } : prev);
+      }
+    });
+  }, [navigation]);
+
 
   if (loading) {
     return (
@@ -123,6 +143,8 @@ const PostDetailScreen = ({ route, navigation }) => {
               onSave={handleSave}
               currentUserId={user?._id}
               showFullCaption
+              onDeletePost={handleDeletePost}
+              onEditPost={handleEditPost}
             />
           ) : null
         }

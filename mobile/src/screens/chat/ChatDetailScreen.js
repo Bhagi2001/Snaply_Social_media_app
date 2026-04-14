@@ -143,7 +143,7 @@ const ChatDetailScreen = ({ route, navigation }) => {
           data={messages}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <MessageBubble message={item} isOwn={item.sender?._id === user?._id} />
+            <MessageBubble message={item} isOwn={item.sender?._id === user?._id} navigation={navigation} />
           )}
           contentContainerStyle={styles.messageList}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
