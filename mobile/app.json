@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Snaply",
+    "slug": "snaply-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/logo.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.snaply.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.snaply.mobile",
+      "usesCleartextTraffic": true
+    },
+    "web": {
+      "favicon": "./src/assets/logo.png",
+      "title": "Snaply"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
+  }
+}
