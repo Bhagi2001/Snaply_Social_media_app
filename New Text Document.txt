@@ -1,0 +1,20 @@
+Frontend (Mobile App):
+
+React Native (JavaScript framework for mobile apps)
+Expo (React Native toolchain)
+React Navigation (navigation library)
+Context API (state management)
+Axios or Fetch API (for API requests)
+Backend (API Server):
+
+Node.js (JavaScript runtime)
+Express.js (web framework)
+MongoDB (database)
+Mongoose (MongoDB ODM)
+Firebase (authentication, push notifications)
+Cloudinary (image storage)
+Socket.io (real-time chat)
+Other Tools:
+
+Git (version control)
+npm or yarn (package management)
