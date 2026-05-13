@@ -2,6 +2,10 @@ import api from '../../config/api';
 
 export const storyApi = {
   createStory: (formData) => api.post('/stories', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    transformRequest: (data) => data,
     timeout: 60000,
   }),
   getStories: () => api.get('/stories'),

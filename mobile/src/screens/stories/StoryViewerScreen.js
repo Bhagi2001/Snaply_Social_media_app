@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, Image, StyleSheet, TouchableOpacity,
-  Animated, StatusBar, useWindowDimensions,
+  Animated, StatusBar, useWindowDimensions, Alert, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import storyApi from '../../services/api/storyApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,12 +15,15 @@ const STORY_DURATION = 5000; // 5 seconds
 const StoryViewerScreen = ({ route, navigation }) => {
   const { storyGroup, initialIndex = 0 } = route.params;
   const { colors } = useTheme();
+  const { user: currentUser } = useAuth();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const progress = useRef(new Animated.Value(0)).current;
   const timerRef = useRef(null);
-  const stories = storyGroup?.stories || [];
+  const [stories, setStories] = useState(storyGroup?.stories || []);
+
+  const isOwnStory = storyGroup?.user?._id === currentUser?._id;
 
   useEffect(() => {
     if (stories.length > 0) {
@@ -57,6 +61,64 @@ const StoryViewerScreen = ({ route, navigation }) => {
   const goPrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const handleDeletePress = () => {
+    progress.stopAnimation();
+    
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to delete this story?')) {
+        executeDelete();
+      } else {
+        startTimer();
+      }
+    } else {
+      Alert.alert(
+        'Delete Story',
+        'Are you sure you want to delete this story?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => startTimer(),
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            onPress: executeDelete,
+            style: 'destructive',
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  };
+
+  const executeDelete = async () => {
+    try {
+      const storyId = stories[currentIndex]?._id;
+      await storyApi.deleteStory(storyId);
+
+      const updatedStories = stories.filter((_, index) => index !== currentIndex);
+      if (updatedStories.length === 0) {
+        navigation.goBack();
+      } else {
+        setStories(updatedStories);
+        if (currentIndex >= updatedStories.length) {
+          setCurrentIndex(updatedStories.length - 1);
+        } else {
+          startTimer();
+          markViewed(updatedStories[currentIndex]?._id);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting story:', error);
+      if (Platform.OS === 'web') {
+        window.alert('Failed to delete story');
+      } else {
+        Alert.alert('Error', 'Failed to delete story');
+      }
+      startTimer();
     }
   };
 
@@ -115,9 +177,16 @@ const StoryViewerScreen = ({ route, navigation }) => {
           <Text style={styles.username}>{user?.username || 'user'}</Text>
           <Text style={styles.timeAgo}>{timeAgo}</Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="close" size={28} color="#FFF" />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          {isOwnStory && (
+            <TouchableOpacity onPress={handleDeletePress} style={{ marginRight: 14 }}>
+              <Ionicons name="trash-outline" size={24} color="#FFF" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="close" size={28} color="#FFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Caption */}
@@ -151,6 +220,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerRight: { flexDirection: 'row', alignItems: 'center' },
   avatar: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   avatarLetter: { color: '#FFF', fontSize: 16, fontWeight: '700' },
   username: { color: '#FFF', fontSize: 15, fontWeight: '600' },

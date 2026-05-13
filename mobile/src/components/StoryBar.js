@@ -19,7 +19,14 @@ const StoryBar = ({ navigation }) => {
 
   useEffect(() => {
     fetchStories();
-  }, []);
+
+    // Refresh stories when screen comes into focus (e.g. after deleting or adding a story)
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchStories();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchStories = async () => {
     try {
