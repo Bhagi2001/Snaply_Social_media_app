@@ -3,7 +3,12 @@ import api from '../../config/api';
 export const userApi = {
   getProfile: (username) => api.get(`/users/${username}`),
   updateProfile: (data) => api.put('/users/profile', data),
-  updateAvatar: (formData) => api.put('/users/avatar', formData),
+  updateAvatar: (formData) => api.put('/users/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    transformRequest: (data) => data,
+  }),
   changePassword: (data) => api.put('/users/security/password', data),
   getSettings: () => api.get('/users/settings'),
   updateSettings: (data) => api.put('/users/settings', data),
