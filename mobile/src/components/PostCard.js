@@ -569,19 +569,21 @@ const PostCard = ({ post, navigation, onLike, onSave, currentUserId, showFullCap
           )}
           <View style={styles.headerInfo}>
             <View style={styles.usernameRow}>
-              <Text style={[styles.username, { color: colors.text }]}>{post.user?.username}</Text>
+              <Text style={[styles.username, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
+                {post.user?.username}
+              </Text>
               {post.user?.isVerified && (
                 <Ionicons name="checkmark-circle" size={14} color="#536DFE" style={{ marginLeft: 4 }} />
               )}
             </View>
             {post.location
-              ? <Text style={[styles.location, { color: colors.textSecondary }]}>{post.location}</Text>
+              ? <Text style={[styles.location, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{post.location}</Text>
               : null}
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleOptionsPress}
-          style={{ padding: 12 }}
+          style={styles.optionsButton}
           hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
         >
           <Ionicons name="ellipsis-horizontal" size={20} color={colors.text} />
@@ -710,7 +712,14 @@ const styles = StyleSheet.create({
   // ── Card ─────────────────────────────────────────────────────────────────
   container: { borderBottomWidth: 0.5, paddingBottom: 8 },
   header: { flexDirection: 'row', alignItems: 'center', padding: 12, justifyContent: 'space-between' },
-  headerUserPressable: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerUserPressable: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
+  optionsButton: {
+    paddingLeft: 12,
+    paddingRight: 4,
+    paddingVertical: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   avatar: { width: 36, height: 36, borderRadius: 18 },
   headerInfo: { flex: 1 },
   usernameRow: { flexDirection: 'row', alignItems: 'center' },

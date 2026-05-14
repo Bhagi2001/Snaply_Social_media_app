@@ -2,11 +2,19 @@ import api from '../../config/api';
 
 export const postApi = {
   createPost: (formData) => api.post('/posts', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    transformRequest: (data) => data,
     timeout: 120000, // 2 min for large uploads
   }),
   getFeed: (page = 1) => api.get(`/posts/feed?page=${page}`),
   getPost: (postId) => api.get(`/posts/${postId}`),
   updatePost: (postId, formData) => api.put(`/posts/${postId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    transformRequest: (data) => data,
     timeout: 120000, // 2 min for large uploads
   }),
   deletePost: (postId) => api.delete(`/posts/${postId}`),
