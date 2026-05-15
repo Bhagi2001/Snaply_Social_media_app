@@ -659,6 +659,110 @@ const updateInteractionUser = async (req, res, next) => {
   }
 };
 
+// @desc    Delete user account and all associated data
+// @route   DELETE /api/users/account
+// @access  Private
+const deleteAccount = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // 1. Delete user avatar from Cloudinary if exists
+    if (user.avatar && user.avatar.publicId) {
+      await deleteFromCloudinary(user.avatar.publicId, 'image');
+    }
+
+    // 2. Find all user's posts to delete their media from Cloudinary
+    const posts = await Post.find({ user: userId });
+    const Comment = require('../models/Comment');
+    for (const post of posts) {
+      if (post.media && Array.isArray(post.media)) {
+        for (const media of post.media) {
+          if (media && media.publicId) {
+            const resourceType = media.type === 'video' ? 'video' : 'image';
+            await deleteFromCloudinary(media.publicId, resourceType);
+          }
+        }
+      }
+      // Delete all comments on this post
+      await Comment.deleteMany({ post: post._id });
+    }
+
+    // 3. Delete all user's posts from database
+    await Post.deleteMany({ user: userId });
+
+    // 4. Delete all user's comments from database
+    await Comment.deleteMany({ user: userId });
+
+    // 5. Delete all user's stories from database and Cloudinary
+    const Story = require('../models/Story');
+    const stories = await Story.find({ user: userId });
+    for (const story of stories) {
+      if (story.media && story.media.publicId) {
+        const resourceType = story.media.type === 'video' ? 'video' : 'image';
+        await deleteFromCloudinary(story.media.publicId, resourceType);
+      }
+    }
+    await Story.deleteMany({ user: userId });
+
+    // 6. Delete all notifications associated with the user
+    await Notification.deleteMany({
+      $or: [{ recipient: userId }, { sender: userId }]
+    });
+
+    // 7. Delete all chat messages and conversations
+    const Conversation = require('../models/Conversation');
+    const Message = require('../models/Message');
+    
+    const conversations = await Conversation.find({
+      participants: userId
+    });
+    
+    for (const conv of conversations) {
+      // Delete all messages in the conversation
+      await Message.deleteMany({ conversation: conv._id });
+    }
+    // Delete the conversations
+    await Conversation.deleteMany({ participants: userId });
+
+    // 8. Remove from followers/following of other users
+    await User.updateMany(
+      { followers: userId },
+      { $pull: { followers: userId } }
+    );
+    await User.updateMany(
+      { following: userId },
+      { $pull: { following: userId } }
+    );
+
+    // 9. Remove user posts from other users' saved posts
+    const postIds = posts.map(p => p._id);
+    if (postIds.length > 0) {
+      await User.updateMany(
+        { savedPosts: { $in: postIds } },
+        { $pull: { savedPosts: { $in: postIds } } }
+      );
+    }
+
+    // 10. Delete the user document itself
+    await User.findByIdAndDelete(userId);
+
+    res.json({
+      success: true,
+      message: 'Account and all associated data deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUserProfile,
   changePassword,
@@ -674,5 +778,6 @@ module.exports = {
   getSettings,
   updateSettings,
   getInteractionUsers,
-  updateInteractionUser
+  updateInteractionUser,
+  deleteAccount
 };
