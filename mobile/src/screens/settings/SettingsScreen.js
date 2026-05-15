@@ -5,11 +5,54 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import userApi from '../../services/api/userApi';
 import GradientHeader from '../../components/GradientHeader';
 
 const SettingsScreen = ({ navigation }) => {
   const { colors, isDark, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+
+  const handleDeleteAccount = () => {
+    if (Platform.OS === 'web') {
+      const confirmed = typeof globalThis.confirm === 'function'
+        ? globalThis.confirm('WARNING: Are you sure you want to permanently delete your account? All your posts, stories, messages, and files will be deleted forever. This cannot be undone!')
+        : true;
+      if (confirmed) {
+        executeDeleteAccount();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Delete Account',
+      'WARNING: Are you sure you want to permanently delete your account? All your posts, stories, messages, and files will be deleted forever. This cannot be undone!',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete Forever', style: 'destructive', onPress: executeDeleteAccount },
+      ]
+    );
+  };
+
+  const executeDeleteAccount = async () => {
+    try {
+      await userApi.deleteAccount();
+      if (Platform.OS === 'web') {
+        window.alert('Your account has been deleted.');
+      } else {
+        Alert.alert('Deleted', 'Your account has been deleted.');
+      }
+      logout();
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      const serverMsg = error.response?.data?.message;
+      const displayMsg = serverMsg ? `Failed to delete account: ${serverMsg}` : 'Failed to delete account. Please try again.';
+      if (Platform.OS === 'web') {
+        window.alert(displayMsg);
+      } else {
+        Alert.alert('Error', displayMsg);
+      }
+    }
+  };
 
   const handleLogout = () => {
     if (Platform.OS === 'web') {
@@ -118,6 +161,14 @@ const SettingsScreen = ({ navigation }) => {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
 
+        {/* Delete Account */}
+        <TouchableOpacity 
+          style={[styles.deleteButton, { borderColor: colors.danger }]} 
+          onPress={handleDeleteAccount}
+        >
+          <Text style={styles.deleteText}>Delete Account</Text>
+        </TouchableOpacity>
+
         <Text style={[styles.version, { color: colors.textTertiary }]}>Snaply v1.0.0</Text>
       </ScrollView>
     </View>
@@ -155,6 +206,11 @@ const styles = StyleSheet.create({
     borderRadius: 12, alignItems: 'center',
   },
   logoutText: { color: '#FF4757', fontSize: 16, fontWeight: '600' },
+  deleteButton: {
+    marginHorizontal: 16, marginTop: 12, padding: 16,
+    borderRadius: 12, borderWidth: 1, alignItems: 'center',
+  },
+  deleteText: { color: '#FF4757', fontSize: 16, fontWeight: '600' },
   version: { textAlign: 'center', fontSize: 13, marginVertical: 20 },
 });
 
