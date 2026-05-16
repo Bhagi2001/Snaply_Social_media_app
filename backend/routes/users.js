@@ -17,7 +17,8 @@ const {
   getSettings,
   updateSettings,
   getInteractionUsers,
-  updateInteractionUser
+  updateInteractionUser,
+  deleteAccount
 } = require('../controllers/userController');
 
 // Configure multer for avatar upload
@@ -39,6 +40,7 @@ router.get('/suggested', auth, getSuggestedUsers);
 router.put('/security/password', auth, changePassword);
 router.get('/settings', auth, getSettings);
 router.put('/settings', auth, updateSettings);
+router.delete('/account', auth, deleteAccount);
 router.get('/interactions/:type', auth, getInteractionUsers);
 router.post('/interactions/:type/:targetId', auth, updateInteractionUser);
 

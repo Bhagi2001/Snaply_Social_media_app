@@ -21,6 +21,7 @@ export const userApi = {
   searchUsers: (query) => api.get(`/users/search?q=${query}`),
   getSuggestedUsers: (limit = 10) => api.get(`/users/suggested?limit=${limit}`),
   getUserPosts: (username, page = 1) => api.get(`/users/${username}/posts?page=${page}`),
+  deleteAccount: () => api.delete('/users/account'),
 };
 
 export default userApi;
