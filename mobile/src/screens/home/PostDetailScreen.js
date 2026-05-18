@@ -81,6 +81,38 @@ const PostDetailScreen = ({ route, navigation }) => {
     }
   }, []);
 
+  const handleLikeComment = useCallback(async (commentId, isLiked) => {
+    try {
+      // Optimistically toggle isLiked and update likesCount locally
+      setComments(prev =>
+        prev.map(c =>
+          c._id === commentId
+            ? {
+                ...c,
+                isLiked: !isLiked,
+                likesCount: isLiked ? Math.max(0, c.likesCount - 1) : c.likesCount + 1,
+              }
+            : c
+        )
+      );
+      await postApi.likeComment(commentId);
+    } catch (error) {
+      console.error('Error liking comment:', error);
+      // Revert on error
+      setComments(prev =>
+        prev.map(c =>
+          c._id === commentId
+            ? {
+                ...c,
+                isLiked,
+                likesCount: isLiked ? c.likesCount + 1 : Math.max(0, c.likesCount - 1),
+              }
+            : c
+        )
+      );
+    }
+  }, []);
+
   const handleSave = useCallback(async (id, isSaved) => {
     try {
       if (isSaved) await postApi.unsavePost(id);
@@ -155,6 +187,7 @@ const PostDetailScreen = ({ route, navigation }) => {
               setReplyTo(comment);
               setCommentText(`@${comment.user.username} `);
             }}
+            onLike={handleLikeComment}
             currentUserId={user?._id}
             navigation={navigation}
           />
