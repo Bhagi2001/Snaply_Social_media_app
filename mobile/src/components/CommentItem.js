@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 
-const CommentItem = ({ comment, onReply, currentUserId, navigation }) => {
+const CommentItem = ({ comment, onReply, onLike, currentUserId, navigation }) => {
   const { colors } = useTheme();
 
   const timeAgo = (date) => {
@@ -68,7 +68,10 @@ const CommentItem = ({ comment, onReply, currentUserId, navigation }) => {
         )}
       </View>
 
-      <TouchableOpacity style={styles.likeButton}>
+      <TouchableOpacity 
+        style={styles.likeButton}
+        onPress={() => onLike && onLike(comment._id, comment.isLiked)}
+      >
         <Ionicons
           name={comment.isLiked ? 'heart' : 'heart-outline'}
           size={14}
